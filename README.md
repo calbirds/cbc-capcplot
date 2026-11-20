@@ -24,12 +24,14 @@ This tool allows visualization of the Putah Creek CBC (CAPC) long-term dataset. 
 
 ## Project layout
 
-- `data/CAPC_CBC_1971_2025_v2.1.csv` – long-term CBC table (wide format with year columns)
-- `data/archive/` – archived historical input datasets
-- `index.html` – the plot (self-contained HTML)
-- `package.json` – npm scripts for dev/build/preview
-
-Older CSV inputs are archived under `data/archive/`.
+- `data/CAPC_CBC_1971_2025_v3.csv` – long-term CBC table (wide format, one column per year). The page reads this file when it loads.
+  - 1971–2020: Steve Hampton's Putah Creek compiler table
+  - 2021–2024: Audubon's published results (two blanks in 2024 filled from the compiler table)
+  - 2025: compiled from eBird checklists of 2025-12-21 (provisional until Audubon publishes)
+- `data/CAPC_v3_corrections.csv` – every cell changed from v2, with the reason
+- `data/CAPC_v3_review.csv` – cells kept as they are that still need a decision
+- `tools/build_capc_v3.py` – rebuilds v3 from v2 and Audubon's export, plus optional review decisions
+- `index.html` – the page
 
 ## Support
 If you find this tool useful, please consider supporting its development:
