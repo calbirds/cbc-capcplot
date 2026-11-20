@@ -164,6 +164,7 @@
             gap: 12px;
         }
         .plotrow.table-hidden .seriesside { display: none; }
+        .headerbtns { display: flex; gap: 8px; flex: 0 0 auto; }
 
         @media (max-height: 760px) {
             .plotheader { font-size: 28px; }
@@ -489,13 +490,12 @@
 
     <div id="plot" class="pane active">
         <div class="plotRegion">
-            <div class="plotheader"><span id="pageTitle">Wrentit</span><button id="toggleTableBtn" class="dlbtn" type="button" aria-controls="seriesSide" aria-expanded="true">Hide table</button></div>
+            <div class="plotheader"><span id="pageTitle">Wrentit</span><span class="headerbtns"><button id="downloadSpeciesBtn" class="dlbtn" type="button" title="Download this species as CSV">Download</button><button id="toggleTableBtn" class="dlbtn" type="button" aria-controls="seriesSide" aria-expanded="true">Hide table</button></span></div>
             <div class="plotrow">
                 <div class="plotwrap">
                     <div id="mainPlot"></div>
                 </div>
                 <aside id="seriesSide" class="seriesside" aria-label="Counts by year">
-                    <button id="downloadSpeciesBtn" class="dlbtn" type="button" title="Download this species as CSV">⤓ Download CSV</button>
                     <div class="seriestablewrap">
                         <table id="seriesTable" class="seriestable">
                             <thead><tr><th>Year</th><th id="seriesCountHead">Count</th></tr></thead>
