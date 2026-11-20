@@ -1,12 +1,22 @@
 Species,Year,v2,v3,Audubon,Reason
+Lesser Goldfinch,1978,77,771,,Review decision: CBC value (Audubon value; Steve's 77 does not fit nearby years)
+Sharp-shinned Hawk,1980,65,6,,Review decision: CBC value (Audubon value; Steve's 65 does not fit nearby years)
+Mallard,1983,16,165,,Review decision: CBC value (Audubon value; Steve's 16 does not fit nearby years)
+Rock Pigeon (Feral Pigeon),1986,21,221,,Review decision: CBC value (Audubon value; Steve's 21 does not fit nearby years)
+Steller's Jay,1986,78,7,,Review decision: CBC value (Audubon value; Steve's 78 does not fit nearby years)
+American Barn Owl,2021,0,1,,Review decision: other value (compilation value; missing from Audubon entry)
 California Scrub-Jay,2021,690,778,778,Use Audubon published value
 Fox Sparrow (Sooty),2021,35,0,,Not in Audubon published results for this year (subspecies row duplicating the species total)
 Great Blue Heron (Great Blue),2021,27,33,33,Use Audubon published value
+Mountain Quail,2021,0,2,,Review decision: other value (compilation value; missing from Audubon entry)
 Orange-crowned Warbler (lutescens),2021,7,0,,Not in Audubon published results for this year (subspecies row duplicating the species total)
+Spotted Sandpiper,2021,0,2,,Review decision: other value (compilation value; missing from Audubon entry)
+Barrow's Goldeneye,2022,0,14,,Review decision: other value (compilation value; missing from Audubon entry)
 California Scrub-Jay,2022,925,964,964,Use Audubon published value
 Fox Sparrow (Sooty),2022,125,0,,Not in Audubon published results for this year (subspecies row duplicating the species total)
 Great Blue Heron (Great Blue),2022,25,26,26,Use Audubon published value
 Orange-crowned Warbler (lutescens),2022,5,0,,Not in Audubon published results for this year (subspecies row duplicating the species total)
+Swainson's Hawk,2022,0,1,,Review decision: other value (compilation value; missing from Audubon entry)
 Fox Sparrow (Sooty),2023,56,0,,Not in Audubon published results for this year (subspecies row duplicating the species total)
 Orange-crowned Warbler (lutescens),2023,20,0,,Not in Audubon published results for this year (subspecies row duplicating the species total)
 Pacific Wren,2023,1,2,2,Use Audubon published value

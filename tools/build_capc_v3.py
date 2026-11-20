@@ -143,6 +143,21 @@ def main():
                     log(corrections, r, y, old, new, ('Review decision: CBC value' if choice == 'cbc' else 'Review decision: other value') + (f' ({note})' if note else ''), d.get('cbc') or None)
                     r[y] = new
 
+    groups = {}
+    for r in rows:
+        m = re.match(r'^(.*?) \((.+)\)$', r['Species'])
+        groups.setdefault(m.group(1) if m else r['Species'], []).append(r)
+    for base, members in groups.items():
+        plain = next((r for r in members if r['Species'] == base), None)
+        forms = [r for r in members if r is not plain]
+        if not plain or not forms:
+            continue
+        for y in YEARS:
+            fv = [r[y] for r in forms if r[y]]
+            if plain[y] > 2 and fv and (plain[y] in fv or plain[y] == sum(fv)):
+                review.append({'Species': base, 'Year': y, 'v2': fmt(plain[y]), 'v3': fmt(plain[y]), 'Audubon': '',
+                               'Reason': f'Possible double count: species row equals its subspecies rows ({", ".join(fmt(v) for v in fv)})'})
+
     a.out_dir.mkdir(parents=True, exist_ok=True)
     with open(a.out_dir / 'CAPC_CBC_1971_2025_v3.csv', 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f, lineterminator='\r\n')
