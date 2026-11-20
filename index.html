@@ -158,7 +158,12 @@
             font-size: clamp(1.28rem, 2.2vw, 1.85rem);
             font-weight: 800;
             color: var(--header-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
         }
+        .plotrow.table-hidden .seriesside { display: none; }
 
         @media (max-height: 760px) {
             .plotheader { font-size: 28px; }
@@ -484,12 +489,12 @@
 
     <div id="plot" class="pane active">
         <div class="plotRegion">
-            <div class="plotheader"><span id="pageTitle">Wrentit</span></div>
+            <div class="plotheader"><span id="pageTitle">Wrentit</span><button id="toggleTableBtn" class="dlbtn" type="button" aria-controls="seriesSide" aria-expanded="true">Hide table</button></div>
             <div class="plotrow">
                 <div class="plotwrap">
                     <div id="mainPlot"></div>
                 </div>
-                <aside class="seriesside" aria-label="Counts by year">
+                <aside id="seriesSide" class="seriesside" aria-label="Counts by year">
                     <button id="downloadSpeciesBtn" class="dlbtn" type="button" title="Download this species as CSV">⤓ Download CSV</button>
                     <div class="seriestablewrap">
                         <table id="seriesTable" class="seriestable">
@@ -1221,6 +1226,20 @@
 
         document.getElementById('downloadSpeciesBtn')?.addEventListener('click', downloadCurrentSpeciesCsv);
 
+        const toggleTableBtn = document.getElementById('toggleTableBtn');
+        const plotRowEl = document.querySelector('.plotrow');
+        function setTableVisible(visible) {
+            plotRowEl?.classList.toggle('table-hidden', !visible);
+            if (toggleTableBtn) {
+                toggleTableBtn.textContent = visible ? 'Hide table' : 'Show table';
+                toggleTableBtn.setAttribute('aria-expanded', String(visible));
+            }
+            try { localStorage.setItem('capcplot.tableHidden', visible ? '0' : '1'); } catch (e) {}
+            scheduleActivePaneResize();
+        }
+        toggleTableBtn?.addEventListener('click', () => setTableVisible(plotRowEl?.classList.contains('table-hidden')));
+        try { if (localStorage.getItem('capcplot.tableHidden') === '1') setTableVisible(false); } catch (e) {}
+
         function setSpecies(index) {
             const i = Number(index) || 0;
             const vis = VIS_BY_SPECIES[i];
@@ -1435,6 +1454,7 @@
         }
 
         const SPECIES_ALIASES = { 'Oak/Juniper Titmouse': 'Oak Titmouse', 'African Collared Dove': 'African Collared-Dove' };
+        const SHOWN_GROUPS = new Set(["Western/Clark's Grebe"]);
         let YEAR_SERIES = new Map();
         let DATA_YEARS = [];
 
@@ -1452,7 +1472,8 @@
                 const m = name.match(/^(.*?)\s*\(([^)]*)\)$/);
                 let base = m ? m[1].trim() : name;
                 base = SPECIES_ALIASES[base] || base;
-                if (/\bsp\.|\/|\sx\s/i.test(base)) continue;
+                if (/\(Domestic type\)$/i.test(name)) continue;
+                if (!SHOWN_GROUPS.has(base) && /\bsp\.|\/|\sx\s/i.test(base)) continue;
                 const counts = yearCols.map(([, i]) => {
                     const v = parseFloat(r[i]);
                     return Number.isFinite(v) ? v : 0;
@@ -1464,9 +1485,6 @@
             for (const [base, members] of groups) {
                 const total = DATA_YEARS.map((_, k) => members.reduce((acc, mm) => acc + mm.counts[k], 0));
                 entries.push({ name: base, counts: total });
-                if (members.length > 1) {
-                    for (const mm of members) if (mm.name !== base) entries.push({ name: mm.name, counts: mm.counts });
-                }
             }
             const kept = entries
                 .filter((e) => e.counts.some((v) => v > 0))
