@@ -258,6 +258,50 @@
 
         /* Trendline UI below main plot */
         .trendwrap { width: 80%; margin: 0 auto; }
+        .dlbtn {
+            flex: 0 0 auto;
+            align-self: flex-start;
+            border: 1px solid rgba(0, 0, 0, 0.18);
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--header-bg);
+            padding: clamp(0.3rem, 0.72vh, 0.45rem) clamp(0.48rem, 1vw, 0.66rem);
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: clamp(0.7rem, 0.8vw, 0.85rem);
+        }
+        .dlbtn:hover { background: var(--panel-muted); }
+        .seriesbox {
+            margin-top: clamp(0.5rem, 1.2vh, 0.8rem);
+            padding: var(--panel-pad);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--panel-muted);
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        .seriestablewrap {
+            max-height: 340px;
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+        }
+        .seriestable { border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.9rem; }
+        .seriestable th {
+            position: sticky;
+            top: 0;
+            background: var(--panel-muted);
+            color: var(--header-bg);
+            text-align: left;
+            padding: 4px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .seriestable td { padding: 3px 14px; border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
+        .seriestable td:last-child, .seriestable th:last-child { text-align: right; }
+        .seriestable tr.latest td { color: red; font-weight: 700; }
+        .seriestable tr.missing td:last-child { color: #9ca3af; }
         .trendctl { display: flex; align-items: center; gap: 8px; font-weight: 600; }
         .trendstats {
             margin-top: clamp(0.35rem, 0.9vh, 0.5rem);
@@ -435,6 +479,15 @@
                     Show trendline (significant trends only)
                 </label>
                 <div id="trendStats" class="trendstats" aria-live="polite"></div>
+                <div class="seriesbox">
+                    <div class="seriestablewrap">
+                        <table id="seriesTable" class="seriestable" aria-label="Counts by year">
+                            <thead><tr><th>Year</th><th id="seriesCountHead">Count</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <button id="downloadSpeciesBtn" class="dlbtn" type="button" title="Download this species as CSV">⤓ Download CSV</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1167,6 +1220,57 @@
             } catch (e) {}
         }
 
+        function seriesRowsForSpecies(i) {
+            const series = getSpeciesSeries(i, VIS_BY_SPECIES[i]);
+            if (!series || !series.years.length) return [];
+            const byYear = new Map(series.years.map((y, k) => [y, series.counts[k]]));
+            const first = Math.min(1971, ...series.years);
+            const last = Math.max(...series.years);
+            const rows = [];
+            for (let y = first; y <= last; y++) rows.push({ year: y, count: byYear.has(y) ? byYear.get(y) : null });
+            return rows;
+        }
+
+        function renderSeriesTable() {
+            const body = document.querySelector('#seriesTable tbody');
+            if (!body) return;
+            const i = Number(currentSpeciesIndex) || 0;
+            const rows = seriesRowsForSpecies(i);
+            const last = rows.length ? rows[rows.length - 1].year : null;
+            const head = document.getElementById('seriesCountHead');
+            if (head) head.textContent = SPECIES[i] || 'Count';
+            body.replaceChildren(...rows.map((r) => {
+                const tr = document.createElement('tr');
+                if (r.year === last) tr.className = 'latest';
+                else if (r.count === null) tr.className = 'missing';
+                const y = document.createElement('td');
+                y.textContent = String(r.year);
+                const c = document.createElement('td');
+                c.textContent = r.count === null ? '–' : String(r.count);
+                tr.append(y, c);
+                return tr;
+            }));
+        }
+
+        function downloadCurrentSpeciesCsv() {
+            const i = Number(currentSpeciesIndex) || 0;
+            const name = SPECIES[i] || 'Species';
+            const rows = seriesRowsForSpecies(i);
+            if (!rows.length) return;
+            const esc = (v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
+            const csv = ['Year,Species,Count', ...rows.map((r) => [r.year, esc(name), r.count === null ? '' : r.count].join(','))].join('\n') + '\n';
+            const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${exportFilenameForCurrentSpecies()}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        document.getElementById('downloadSpeciesBtn')?.addEventListener('click', downloadCurrentSpeciesCsv);
+
         function setSpecies(index) {
             const i = Number(index) || 0;
             const vis = VIS_BY_SPECIES[i];
@@ -1187,6 +1291,7 @@
             if (trendingSelect) trendingSelect.value = trendingIndexSet.has(i) ? String(i) : '';
 
             updateTrendline(i, vis, speciesName);
+            renderSeriesTable();
 
             setUrlSpeciesParam(i);
         }
